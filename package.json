@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "clipboardy": "^5.3.1",
     "comander": "^0.0.1-security"
   }
 }
