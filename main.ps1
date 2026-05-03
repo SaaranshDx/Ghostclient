@@ -3,7 +3,68 @@ Add-Type -AssemblyName PresentationCore
 
 $filePath = $args[0]
 
+function Show-ErrorPopup {
+    param([string]$ErrorMessage)
+
+    $xaml3 = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Width="300" Height="140"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen">
+
+    <Border CornerRadius="10" Background="#1E1E1E" Padding="10">
+        <Grid>
+
+            <TextBlock Name="CloseBtn3"
+                       Text="✕"
+                       Foreground="#AAAAAA"
+                       FontSize="11"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Top"
+                       Cursor="Hand"/>
+
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
+                <TextBlock Text="Error"
+                           Foreground="#FF4444"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock Name="ErrorMessage"
+                           Foreground="#EAEAEA"
+                           FontSize="11"
+                           TextWrapping="Wrap"
+                           MaxWidth="280"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
+"@
+
+    $reader3 = New-Object System.Xml.XmlNodeReader ([xml]$xaml3)
+    $win3 = [Windows.Markup.XamlReader]::Load($reader3)
+
+    $closeBtn3 = $win3.FindName("CloseBtn3")
+    $errorMessageBlock = $win3.FindName("ErrorMessage")
+    
+    $errorMessageBlock.Text = $ErrorMessage
+
+    # draggable
+    $win3.Add_MouseDown({ $win3.DragMove() })
+
+    # close
+    $closeBtn3.Add_MouseLeftButtonDown({
+        $win3.Close()
+    })
+
+    $win3.ShowDialog()
+}
+
 if (-not $filePath) {
+    Show-ErrorPopup -ErrorMessage "No file provided"
     exit
 }
 
@@ -30,7 +91,7 @@ $xaml = @"
 
             <StackPanel Margin="0,10,0,0">
 
-                <TextBlock Text="GhostDrop"
+                <TextBlock Text="Password (optional)"
                            Foreground="#EAEAEA"
                            FontSize="14"
                            Margin="0,0,0,6"/>
@@ -138,6 +199,7 @@ $btn.Add_Click({
 
     } catch {
         $window.Close()
+        Show-ErrorPopup -ErrorMessage $_.Exception.Message
     }
 })
 
