@@ -1,0 +1,1 @@
+Invoke-ps2exe .\main.ps1 .\build\GhostClient.exe -icon .\assets\ghostdroplogo.ico
