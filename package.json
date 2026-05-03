@@ -1,0 +1,9 @@
+{
+  "name": "ghostclient",
+  "module": "index.js",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "comander": "^0.0.1-security"
+  }
+}
