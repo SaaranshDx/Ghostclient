@@ -1,11 +1,8 @@
 const path = require('bun:path');
 import clipboard from "clipboardy";
 
-let apiurl;
 const args = process.argv.slice(2);
 const maskapiurl = "https://link.ghostdrop.qzz.io/";
-const apiurlcomposed = `${apiurl}/upload/`;
-const apiurlgetcomposed = `${apiurl}/files/`;
 
 if (args.length === 0) {
     console.error('Please provide a command: "Upload" or "Get"');
@@ -27,6 +24,7 @@ async function getApiUrl() {
 
 if (args[0]?.toLowerCase() === 'upload') {
     const apiurl = await getApiUrl();
+    const apiurlcomposed = `${apiurl}/upload/`;
     const cwd = process.cwd();
     const input = args[1]; 
     const fullPath = path.resolve(cwd, input);
