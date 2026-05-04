@@ -184,10 +184,38 @@ $btn.Add_Click({
     try {
         $apiUrl = Invoke-RestMethod "https://raw.githubusercontent.com/SaaranshDx/GhostDrop/main/serverurl"
 
-        $response = Invoke-RestMethod -Uri "$apiUrl/upload/" `
-            -Method Post `
-            -Headers @{ password = $password } `
-            -Form @{ file = Get-Item $filePath }
+        $fileItem = Get-Item $filePath
+        $boundary = [System.Guid]::NewGuid().ToString()
+        $fileBytes = [System.IO.File]::ReadAllBytes($fileItem.FullName)
+        
+        # Build multipart body with proper CRLF formatting
+        $bodyStart = "--$boundary`r`nContent-Disposition: form-data; name=`"file`"; filename=`"$($fileItem.Name)`"`r`nContent-Type: application/octet-stream`r`n`r`n"
+        $bodyEnd = "`r`n--$boundary--`r`n"
+        
+        $bodyStartBytes = [System.Text.Encoding]::UTF8.GetBytes($bodyStart)
+        $bodyEndBytes = [System.Text.Encoding]::UTF8.GetBytes($bodyEnd)
+
+        $webRequest = [System.Net.HttpWebRequest]::Create("$apiUrl/upload/")
+        $webRequest.Method = "POST"
+        $webRequest.ContentType = "multipart/form-data; boundary=$boundary"
+        $webRequest.Headers.Add("password", $password)
+        $webRequest.ContentLength = $bodyStartBytes.Length + $fileBytes.Length + $bodyEndBytes.Length
+        
+        $requestStream = $webRequest.GetRequestStream()
+        $requestStream.Write($bodyStartBytes, 0, $bodyStartBytes.Length)
+        $requestStream.Write($fileBytes, 0, $fileBytes.Length)
+        $requestStream.Write($bodyEndBytes, 0, $bodyEndBytes.Length)
+        $requestStream.Close()
+
+        $response = $webRequest.GetResponse()
+        $responseStream = $response.GetResponseStream()
+        $streamReader = New-Object System.IO.StreamReader($responseStream)
+        $responseText = $streamReader.ReadToEnd()
+        $streamReader.Close()
+        $response.Close()
+
+        $responseObj = ConvertFrom-Json $responseText
+        $response = $responseObj
 
         $link = "https://link.ghostdrop.qzz.io/$($response.id)/"
 
