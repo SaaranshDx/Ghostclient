@@ -3,7 +3,7 @@
 A client for quick and secure file sharing with GhostDrop.
 
 ## Demo
-![vid](assets\20260504-1109-30.1792959.mp4)
+![vid](assets/20260504-1109-30.1792959.mp4)
 
 ## Features
 
